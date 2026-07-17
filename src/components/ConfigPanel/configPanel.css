@@ -28,20 +28,28 @@
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 18px 18px 16px;
+  padding: 16px 18px 14px;
   border-bottom: 1px solid var(--border-soft);
-  background: var(--accent-det-bg);
+  border-left: 3px solid var(--accent-det);
+  background: var(--bg-panel-raised);
 }
 .side-panel__header--llm {
-  background: var(--accent-llm-bg);
+  border-left-color: var(--accent-llm);
 }
 
 .side-panel__icon {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: var(--accent-det-bg);
   color: var(--accent-det);
-  margin-top: 3px;
 }
 .side-panel__header--llm .side-panel__icon {
+  background: var(--accent-llm-bg);
   color: var(--accent-llm-strong);
 }
 
@@ -50,18 +58,24 @@
   min-width: 0;
 }
 
+/* Status-badge pill (borrowed from the agent-behavior UX rework's status-badge
+   primitive) instead of plain uppercase label text. */
 .side-panel__type {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 10.5px;
+  gap: 4px;
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  padding: 2.5px 8px;
+  border-radius: 999px;
+  background: var(--accent-det-bg);
   color: var(--accent-det);
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 .side-panel__header--llm .side-panel__type {
+  background: var(--accent-llm-bg);
   color: var(--accent-llm-strong);
 }
 .side-panel__sparkle {
@@ -146,53 +160,78 @@
   color: var(--text-primary);
 }
 
+/* Mode pickers restyled as a row of independent chips (the agent-behavior
+   rework's chip-group primitive) instead of a joined segmented bar. */
 .segmented {
   display: flex;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  border: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 6px;
 }
 .segmented--wrap {
   flex-wrap: wrap;
-  border: none;
   gap: 6px;
 }
 .segmented__opt {
   flex: 1;
-  padding: 7px 10px;
+  padding: 6px 12px;
   font-size: 11.5px;
   font-weight: 600;
   background: var(--bg-inset);
   color: var(--text-secondary);
-  border: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
   cursor: pointer;
   white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 .segmented--wrap .segmented__opt {
   flex: none;
-  border: 1px solid var(--border);
-  border-radius: 999px;
 }
-.segmented__opt:not(:last-child) {
-  border-right: 1px solid var(--border);
-}
-.segmented--wrap .segmented__opt:not(:last-child) {
-  border-right: 1px solid var(--border);
+.segmented__opt:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
 }
 .segmented__opt--active {
   background: var(--accent-selected);
+  border-color: var(--accent-selected);
   color: #fff;
+}
+.segmented__opt--active.segmented__opt--danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+.segmented__opt--active.segmented__opt--success {
+  background: var(--success);
+  border-color: var(--success);
+  color: #06231f;
 }
 
 .branch-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
 }
+/* Each row reads as a pill-shaped chip (matching the rework's tag/chip
+   primitive) with its input embedded, rather than a bare bordered row. */
 .branch-row {
   display: flex;
   align-items: center;
   gap: 7px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 6px 3px 12px;
+}
+.branch-row input,
+.branch-row select {
+  background: transparent;
+  border: none;
+  padding: 4px 2px;
+}
+.branch-row input:focus,
+.branch-row select:focus {
+  box-shadow: none;
 }
 .branch-row__dot {
   width: 7px;
@@ -212,8 +251,9 @@
 }
 .branch-row__default-btn {
   font-size: 10px;
+  font-weight: 600;
   color: var(--text-muted);
-  background: transparent;
+  background: var(--bg-panel-raised);
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 3px 8px;
@@ -230,8 +270,11 @@
   color: var(--text-muted);
   cursor: pointer;
   display: flex;
-  padding: 4px;
-  border-radius: 5px;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
   flex-shrink: 0;
 }
 .branch-row__icon-btn:hover {
@@ -249,8 +292,8 @@
   color: var(--accent-selected);
   background: transparent;
   border: 1px dashed var(--border-strong);
-  border-radius: var(--radius-sm);
-  padding: 7px 11px;
+  border-radius: 999px;
+  padding: 7px 13px;
   cursor: pointer;
 }
 .add-row-btn:hover {
@@ -258,7 +301,7 @@
 }
 .add-row-btn--small {
   font-size: 11px;
-  padding: 5px 9px;
+  padding: 5px 11px;
 }
 
 .action-list {
@@ -268,7 +311,7 @@
 }
 .action-card {
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   padding: 10px;
   background: var(--bg-inset);
   display: flex;
@@ -313,6 +356,18 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px 6px;
+}
+.param-row input {
+  background: transparent;
+  border: none;
+  padding: 4px 2px;
+}
+.param-row input:focus {
+  box-shadow: none;
 }
 .param-row__sep {
   color: var(--text-muted);

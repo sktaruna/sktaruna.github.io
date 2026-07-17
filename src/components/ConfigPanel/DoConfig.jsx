@@ -15,15 +15,19 @@ export default function DoConfig({ node, config, onUpdateConfig }) {
       <div className="field-group">
         <label className="field-label">Mode</label>
         <div className="segmented segmented--wrap">
-          {Object.values(DO_MODE).map((m) => (
-            <button
-              key={m}
-              className={`segmented__opt ${config.mode === m ? 'segmented__opt--active' : ''}`}
-              onClick={() => onUpdateConfig({ mode: m })}
-            >
-              {MODE_LABEL[m]}
-            </button>
-          ))}
+          {Object.values(DO_MODE).map((m) => {
+            const semantic = m === DO_MODE.ESCALATE ? 'danger' : m === DO_MODE.FINISH ? 'success' : ''
+            const active = config.mode === m
+            return (
+              <button
+                key={m}
+                className={`segmented__opt ${active ? 'segmented__opt--active' : ''} ${active && semantic ? `segmented__opt--${semantic}` : ''}`}
+                onClick={() => onUpdateConfig({ mode: m })}
+              >
+                {MODE_LABEL[m]}
+              </button>
+            )
+          })}
         </div>
       </div>
 

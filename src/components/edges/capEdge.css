@@ -1,6 +1,12 @@
 .cap-edge {
   stroke: var(--border-strong);
-  stroke-width: 1.75;
+  stroke-width: 2;
+  pointer-events: none; /* the wide cap-edge__hit path underneath owns all hover/click detection */
+  transition: stroke 0.15s ease, stroke-width 0.15s ease, filter 0.15s ease;
+}
+
+.cap-edge__hit {
+  cursor: pointer;
 }
 
 .cap-edge--default {
@@ -13,10 +19,21 @@
   stroke: var(--warn);
 }
 
+.cap-edge--hover {
+  stroke: var(--accent-selected);
+  stroke-width: 2.75;
+  filter: drop-shadow(0 0 5px rgba(79, 140, 255, 0.55));
+}
+
 .cap-edge--active {
   stroke: var(--accent-active);
   stroke-width: 2.5;
   filter: drop-shadow(0 0 6px rgba(52, 214, 214, 0.65));
+}
+
+.cap-edge--active.cap-edge--hover {
+  stroke-width: 3.25;
+  filter: drop-shadow(0 0 9px rgba(52, 214, 214, 0.85));
 }
 
 .cap-edge__label {
@@ -28,8 +45,10 @@
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 2px 9px;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: pointer;
   white-space: nowrap;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
 }
 
 .cap-edge__label--default {
@@ -42,9 +61,22 @@
   border-color: rgba(245, 181, 86, 0.5);
 }
 
+.cap-edge__label--hover {
+  color: #fff;
+  background: var(--accent-selected);
+  border-color: var(--accent-selected);
+  font-weight: 700;
+}
+
 .cap-edge__label--active {
   color: #06231f;
   background: var(--accent-active);
   border-color: var(--accent-active);
   font-weight: 700;
+}
+
+.cap-edge__label--active.cap-edge__label--hover {
+  background: var(--accent-active);
+  border-color: var(--accent-active);
+  filter: brightness(1.12);
 }

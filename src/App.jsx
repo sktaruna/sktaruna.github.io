@@ -16,6 +16,7 @@ import {
 import { findEntryNodeId, resolveOutcome, mockAskPlaceholder, computeSetValue, applyDoEffects } from './trace/traceEngine'
 import CapNode from './components/nodes/CapNode'
 import CapEdge from './components/edges/CapEdge'
+import EdgeMarkers from './components/edges/EdgeMarkers'
 import TopBar from './components/TopBar'
 import Palette from './components/Palette'
 import ConfigPanel from './components/ConfigPanel/ConfigPanel'
@@ -281,6 +282,7 @@ export default function App() {
       <div className="app-body">
         <Palette onAdd={handleAddNode} />
         <div className="canvas-wrap">
+          <EdgeMarkers />
           <ReactFlow
             key={exampleKey}
             nodes={renderedNodes}

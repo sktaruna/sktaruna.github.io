@@ -127,29 +127,31 @@
   padding: 1px 5px;
 }
 
+/* Status-badge pills (same primitive as the config panel's side-panel__type
+   and the agent-behavior UX rework's status-badge) instead of bare tinted text. */
 .cap-node__tag {
+  display: inline-flex;
+  align-items: center;
   font-size: 10px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--text-muted);
+  background: var(--bg-inset);
+  padding: 2px 8px;
+  border-radius: 999px;
 }
 .cap-node__tag--det {
   color: var(--accent-det);
-  font-weight: 600;
+  background: var(--accent-det-bg);
 }
 .cap-node__tag--danger {
   color: var(--danger);
-  font-weight: 700;
   background: var(--danger-bg);
-  padding: 2px 7px;
-  border-radius: 5px;
 }
 .cap-node__tag--success {
   color: var(--success);
-  font-weight: 700;
   background: var(--success-bg);
-  padding: 2px 7px;
-  border-radius: 5px;
 }
 
 .cap-node__badge-count {
