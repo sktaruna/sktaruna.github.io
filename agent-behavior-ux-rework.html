@@ -1,0 +1,2201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Behavior UX Rework - Design System</title>
+<style>
+:root {
+  --bg-primary: #0f0f1a;
+  --bg-secondary: #16162a;
+  --bg-tertiary: #1e1e3a;
+  --bg-card: #1a1a35;
+  --bg-code: #0d0d1a;
+  --border: #2a2a50;
+  --border-light: #3a3a65;
+  --text-primary: #e8e8f0;
+  --text-secondary: #9a9ab8;
+  --text-muted: #6a6a90;
+  --accent: #6366f1;
+  --accent-light: #818cf8;
+  --accent-glow: rgba(99, 102, 241, 0.15);
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+  --user-msg: #6366f1;
+  --agent-msg: #1e1e3a;
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(15, 15, 26, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 1.25rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.header .badge {
+  background: var(--accent);
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.nav-sidebar {
+  position: fixed;
+  left: 0;
+  top: 64px;
+  width: 240px;
+  height: calc(100vh - 64px);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 1.25rem 0;
+  z-index: 90;
+}
+
+.nav-group { margin-bottom: 1.25rem; }
+
+.nav-group-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  padding: 0 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 1.25rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.nav-item:hover {
+  background: rgba(99, 102, 241, 0.06);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--accent-light);
+  border-left-color: var(--accent);
+}
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.nav-icon.demo { background: rgba(99,102,241,0.2); color: #a5b4fc; }
+.nav-icon.collect { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.nav-icon.action { background: rgba(139,92,246,0.15); color: #a78bfa; }
+.nav-icon.choice { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.nav-icon.confirm { background: rgba(16,185,129,0.15); color: #34d399; }
+.nav-icon.guide { background: rgba(236,72,153,0.15); color: #f472b6; }
+.nav-icon.investigate { background: rgba(249,115,22,0.15); color: #fb923c; }
+.nav-icon.if { background: rgba(6,182,212,0.15); color: #22d3ee; }
+.nav-icon.escalate { background: rgba(239,68,68,0.15); color: #f87171; }
+.nav-icon.done { background: rgba(34,197,94,0.15); color: #4ade80; }
+.nav-icon.while { background: rgba(168,85,247,0.15); color: #c084fc; }
+.nav-icon.foreach { background: rgba(20,184,166,0.15); color: #2dd4bf; }
+
+.main-content {
+  margin-left: 240px;
+  padding: 2rem 2.5rem;
+  max-width: 1000px;
+}
+
+.section {
+  margin-bottom: 4rem;
+  scroll-margin-top: 80px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.section-badge.demo { background: linear-gradient(135deg, #6366f1, #a5b4fc); }
+.section-badge.collect { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+.section-badge.action { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
+.section-badge.choice { background: linear-gradient(135deg, #d97706, #f59e0b); }
+.section-badge.confirm { background: linear-gradient(135deg, #059669, #10b981); }
+.section-badge.guide { background: linear-gradient(135deg, #db2777, #ec4899); }
+.section-badge.investigate { background: linear-gradient(135deg, #ea580c, #f97316); }
+.section-badge.if { background: linear-gradient(135deg, #0891b2, #06b6d4); }
+.section-badge.escalate { background: linear-gradient(135deg, #dc2626, #ef4444); }
+.section-badge.done { background: linear-gradient(135deg, #16a34a, #22c55e); }
+.section-badge.while { background: linear-gradient(135deg, #9333ea, #a855f7); }
+.section-badge.foreach { background: linear-gradient(135deg, #0d9488, #14b8a6); }
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.section-desc {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: 0.15rem;
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.panel-header {
+  padding: 0.875rem 1.1rem;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.panel-header .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.panel-header .dot.yaml { background: var(--warning); }
+.panel-header .dot.ux { background: var(--success); }
+.panel-header .dot.live { background: var(--accent-light); animation: dotBounce 1.4s infinite ease-in-out; }
+
+.panel-body { padding: 1.1rem; }
+
+.code-block {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.875rem 1rem;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.75rem;
+  line-height: 1.7;
+  overflow-x: auto;
+  color: #a5b4fc;
+}
+
+.code-block .key { color: #818cf8; }
+.code-block .string { color: #86efac; }
+.code-block .dash { color: #f472b6; }
+
+.chat-mockup {
+  background: var(--bg-primary);
+  border-radius: 10px;
+  overflow: hidden;
+  min-height: 280px;
+}
+
+.chat-header {
+  background: var(--bg-tertiary);
+  padding: 0.75rem 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.chat-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: white;
+}
+
+.chat-info { flex: 1; }
+.chat-name { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); }
+.chat-status { font-size: 0.65rem; color: var(--success); display: flex; align-items: center; gap: 0.3rem; }
+.chat-status::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--success); }
+
+.chat-body {
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.msg {
+  max-width: 88%;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  animation: msgIn 0.25s ease;
+}
+
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.msg-agent {
+  background: var(--agent-msg);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 3px;
+  align-self: flex-start;
+  color: var(--text-primary);
+}
+
+.msg-user {
+  background: var(--user-msg);
+  border-bottom-right-radius: 3px;
+  align-self: flex-end;
+  color: white;
+}
+
+.msg-time {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  margin-top: 0.3rem;
+  text-align: right;
+}
+
+.msg-agent .msg-time { text-align: left; }
+
+.input-field {
+  width: 100%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.875rem;
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.input-field:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.input-field::placeholder { color: var(--text-muted); }
+
+.btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.btn {
+  padding: 0.65rem 1.1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: inherit;
+}
+
+.btn:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--border-light);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent-light);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  justify-content: center;
+}
+
+.btn-primary:hover {
+  background: var(--accent-light);
+  border-color: var(--accent-light);
+}
+
+.btn-success {
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
+  justify-content: center;
+}
+
+.btn-danger {
+  background: var(--error);
+  border-color: var(--error);
+  color: white;
+  justify-content: center;
+}
+
+.btn-outline {
+  background: transparent;
+  border-color: var(--border-light);
+}
+
+.btn-icon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.info-card {
+  background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.04));
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.875rem 1.1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.info-card .icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(99, 102, 241, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.info-card h4 { font-size: 0.82rem; font-weight: 600; margin-bottom: 0.2rem; }
+.info-card p { font-size: 0.75rem; color: var(--text-secondary); }
+
+.step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: 7px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.step-item .num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.step-item.completed { color: var(--text-primary); }
+.step-item.completed .num { background: var(--success); }
+.step-item.active { border: 1px solid var(--accent); background: var(--accent-glow); color: var(--text-primary); }
+
+/* --- status-badge primitive ---
+   Formalized as its own primitive (see primitive_expansion_plan.md #2):
+   state communicated via icon glyph + text label together, never color alone. */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 5px;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.status-badge.success { background: rgba(34,197,94,0.12); color: #4ade80; }
+.status-badge.error { background: rgba(239,68,68,0.12); color: #f87171; }
+.status-badge.warning { background: rgba(245,158,11,0.12); color: #fbbf24; }
+.status-badge.info { background: rgba(59,130,246,0.12); color: #60a5fa; }
+.status-badge.pending { background: rgba(106,106,144,0.15); color: var(--text-muted); }
+
+.loading-dots {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.4rem 0;
+}
+
+.loading-dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  animation: dotBounce 1.4s infinite ease-in-out both;
+}
+
+.loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+.loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+
+.progress-bar {
+  width: 100%;
+  height: 3px;
+  background: var(--bg-secondary);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 0.6rem 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+.confirm-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.875rem;
+  margin: 0.4rem 0;
+}
+
+.confirm-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+}
+
+.confirm-row:last-child { border-bottom: none; }
+.confirm-row .label { color: var(--text-muted); }
+.confirm-row .value { color: var(--text-primary); font-weight: 500; }
+
+/* --- chip-group primitive ---
+   Two variants of the same tag shape (see primitive_expansion_plan.md #2):
+   static hint tags (informational, not focusable) vs. clickable chips
+   (real buttons: keyboard-operable, auto-fill an input on activation). */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 5px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  font-family: inherit;
+}
+
+button.tag.clickable {
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+button.tag.clickable:hover {
+  background: var(--border-light);
+  color: var(--text-primary);
+}
+
+button.tag.clickable:focus-visible {
+  outline: 2px solid var(--accent-light);
+  outline-offset: 1px;
+}
+
+button.tag.clickable.selected {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+/* --- rating-scale primitive ---
+   Single-select emoji picker (see primitive_expansion_plan.md #2):
+   role=radiogroup / role=radio with a real aria-label per point,
+   not just the emoji glyph, plus a visible selected state. */
+.rating-scale {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.rating-scale button {
+  font-size: 1.25rem;
+  cursor: pointer;
+  opacity: 0.5;
+  background: none;
+  border: none;
+  padding: 0.15rem;
+  border-radius: 6px;
+  line-height: 1;
+  transition: all 0.15s ease;
+}
+
+.rating-scale button:hover { opacity: 0.85; }
+
+.rating-scale button[aria-checked="true"] {
+  opacity: 1;
+  background: var(--accent-glow);
+  transform: scale(1.15);
+}
+
+.rating-scale button:focus-visible {
+  outline: 2px solid var(--accent-light);
+  outline-offset: 2px;
+  opacity: 1;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.data-table th {
+  text-align: left;
+  padding: 0.5rem 0.6rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+
+.data-table td {
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.design-note {
+  background: linear-gradient(135deg, rgba(99,102,241,0.06), rgba(139,92,246,0.03));
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.design-note h4 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent-light);
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.design-note ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.design-note li {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  padding-left: 1.1rem;
+  position: relative;
+}
+
+.design-note li::before {
+  content: '->';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.demo-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.demo-controls {
+  padding: 0.875rem 1.1rem;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.demo-controls .label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.demo-chat { min-height: 460px; }
+.demo-chat .chat-body { min-height: 380px; }
+
+.demo-hint {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 0.5rem;
+}
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+@media (max-width: 1024px) {
+  .nav-sidebar { display: none; }
+  .main-content { margin-left: 0; padding: 1.5rem; }
+  .comparison-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1>Agent Behavior UX Rework</h1>
+  <span class="badge">11 Behaviors + Live Demo</span>
+</header>
+
+<nav class="nav-sidebar">
+  <div class="nav-group">
+    <div class="nav-group-title">Live Demo</div>
+    <a href="#demo" class="nav-item active">
+      <span class="nav-icon demo">Pl</span>
+      Full Conversation
+    </a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-title">Core Behaviors</div>
+    <a href="#collect" class="nav-item">
+      <span class="nav-icon collect">In</span>
+      Collect
+    </a>
+    <a href="#action" class="nav-item">
+      <span class="nav-icon action">Ac</span>
+      Action
+    </a>
+    <a href="#choice" class="nav-item">
+      <span class="nav-icon choice">Ch</span>
+      Choice
+    </a>
+    <a href="#confirm" class="nav-item">
+      <span class="nav-icon confirm">Co</span>
+      Confirm
+    </a>
+    <a href="#guide" class="nav-item">
+      <span class="nav-icon guide">Gu</span>
+      Guide
+    </a>
+    <a href="#investigate" class="nav-item">
+      <span class="nav-icon investigate">In</span>
+      Investigate
+    </a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-title">Flow Control</div>
+    <a href="#if" class="nav-item">
+      <span class="nav-icon if">If</span>
+      If / Else
+    </a>
+    <a href="#escalate" class="nav-item">
+      <span class="nav-icon escalate">Es</span>
+      Escalate
+    </a>
+    <a href="#done" class="nav-item">
+      <span class="nav-icon done">Do</span>
+      Done
+    </a>
+    <a href="#while" class="nav-item">
+      <span class="nav-icon while">Wh</span>
+      While
+    </a>
+    <a href="#foreach" class="nav-item">
+      <span class="nav-icon foreach">Fo</span>
+      Foreach
+    </a>
+  </div>
+</nav>
+
+<main class="main-content">
+
+  <!-- INTRO -->
+  <div class="section" style="margin-bottom: 2.5rem;">
+    <div class="section-header">
+      <div class="section-badge collect" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">Ph</div>
+      <div>
+        <div class="section-title">Design Philosophy</div>
+        <div class="section-desc">Reworking agent behaviors for clarity, trust, and seamless interaction</div>
+      </div>
+    </div>
+    <div class="design-note" style="margin-top: 0;">
+      <h4>Core Principles</h4>
+      <ul>
+        <li><strong>Progressive Disclosure:</strong> Show only what is needed, when it is needed. Reduce cognitive load.</li>
+        <li><strong>Visual Feedback Loops:</strong> Every action gets immediate, clear feedback. No dead air.</li>
+        <li><strong>Context Preservation:</strong> Always show where the user is in the journey. No getting lost.</li>
+        <li><strong>Graceful Failures:</strong> Errors are explained, not thrown. Escalation is a feature, not a bug.</li>
+        <li><strong>Action Affordances:</strong> Make the next step obvious. Buttons over text, cards over walls of text.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- LIVE DEMO -->
+  <section class="section" id="demo">
+    <div class="section-header">
+      <div class="section-badge demo">Pl</div>
+      <div>
+        <div class="section-title">Live Demo &mdash; Full Conversation</div>
+        <div class="section-desc">One dummy end-to-end reschedule conversation, chaining collect &rarr; action &rarr; if/else &rarr; guide (retry) &rarr; confirm &rarr; done through every primitive above</div>
+      </div>
+    </div>
+
+    <div class="demo-panel">
+      <div class="demo-controls">
+        <span class="label">Reschedule Delivery &mdash; Dummy Run</span>
+        <button class="btn btn-primary" id="demo-play" style="width: auto; padding: 0.5rem 1.1rem;">&#9654; Play Conversation</button>
+      </div>
+      <div class="chat-mockup demo-chat">
+        <div class="chat-header">
+          <div class="chat-avatar">AI</div>
+          <div class="chat-info">
+            <div class="chat-name">Delivery Assistant</div>
+            <div class="chat-status" id="demo-status">Online</div>
+          </div>
+        </div>
+        <div class="chat-body" id="demo-body"></div>
+      </div>
+      <div class="demo-hint" id="demo-hint">Press Play to replay the conversation. Every message below is scripted (dummy data) &mdash; nothing here calls a real API.</div>
+    </div>
+
+    <div class="design-note">
+      <h4>What this demo is exercising</h4>
+      <ul>
+        <li><strong>collect:</strong> order ID input with static hint tags (non-clickable, informational).</li>
+        <li><strong>action:</strong> loading indicator &rarr; progress bar &rarr; <span class="status-badge success" style="vertical-align: middle;">Found</span> outcome card.</li>
+        <li><strong>if/else:</strong> a "Checking..." badge resolves to an <span class="status-badge success" style="vertical-align: middle;">Eligible</span> branch.</li>
+        <li><strong>guide (retry):</strong> an invalid free-text date is rejected, then a clickable chip auto-fills a valid one.</li>
+        <li><strong>confirm:</strong> a summary card with the changed value highlighted, before the irreversible step.</li>
+        <li><strong>done:</strong> success card, next-step actions, and an accessible emoji rating scale.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 1. COLLECT -->
+  <section class="section" id="collect">
+    <div class="section-header">
+      <div class="section-badge collect">In</div>
+      <div>
+        <div class="section-title">Collect</div>
+        <div class="section-desc">Gather information from the user with smart input fields and validation</div>
+      </div>
+    </div>
+
+    <div class="comparison-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot yaml"></span>
+          YAML Input
+        </div>
+        <div class="panel-body">
+          <div class="code-block">
+<span class="dash">-</span> <span class="key">collect</span>:
+    <span class="key">when</span>:
+      <span class="key">missing</span>:
+        <span class="dash">-</span> <span class="string">order-id</span>
+    <span class="key">fields</span>:
+      <span class="dash">-</span> <span class="string">order-id</span>
+      <span class="dash">-</span> <span class="string">customer-id</span>
+    <span class="key">prompt</span>: <span class="string">"Please type your Order ID below..."</span>
+    <span class="key">select_priority</span>: <span class="string">100</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot ux"></span>
+          Improved UX
+        </div>
+        <div class="panel-body">
+          <div class="chat-mockup">
+            <div class="chat-header">
+              <div class="chat-avatar">AI</div>
+              <div class="chat-info">
+                <div class="chat-name">Delivery Assistant</div>
+                <div class="chat-status">Online</div>
+              </div>
+            </div>
+            <div class="chat-body">
+              <div class="msg msg-agent">
+                <strong>Let's find your order</strong><br><br>
+                To help you reschedule, I need to look up your order. Please enter your <strong>Order ID</strong> below.<br><br>
+                <span style="color: var(--text-muted); font-size: 0.75rem;">Tip: You can find it in your confirmation email or under "My Orders" in your account.</span>
+                <div class="msg-time">Just now</div>
+              </div>
+              <div style="display: flex; gap: 0.4rem; margin-top: 0.4rem;">
+                <input type="text" class="input-field" placeholder="e.g. ORD-2026-78432" style="flex: 1;">
+                <button class="btn btn-primary" style="width: auto; padding: 0.6rem 1rem;">Go</button>
+              </div>
+              <div style="margin-top: 0.4rem; display: flex; gap: 0.4rem; flex-wrap: wrap;" role="group" aria-label="Hints">
+                <span class="tag">From email</span>
+                <span class="tag">My Orders</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="design-note">
+      <h4>UX Improvements</h4>
+      <ul>
+        <li><strong>Contextual Header:</strong> Sets expectations before the user reads a word.</li>
+        <li><strong>Inline Input:</strong> Input field appears directly in the chat flow, not a separate modal.</li>
+        <li><strong>Smart Hints:</strong> Static informational tags show where to find the info &mdash; not clickable, since they don't map to a value.</li>
+        <li><strong>Visual Priority:</strong> Bold keywords guide the eye to the required action.</li>
+        <li><strong>Progressive Validation:</strong> Real-time format checking as the user types.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 2. ACTION -->
+  <section class="section" id="action">
+    <div class="section-header">
+      <div class="section-badge action">Ac</div>
+      <div>
+        <div class="section-title">Action</div>
+        <div class="section-desc">Call an integration action with clear loading states and outcome handling</div>
+      </div>
+    </div>
+
+    <div class="comparison-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot yaml"></span>
+          YAML Input
+        </div>
+        <div class="panel-body">
+          <div class="code-block">
+<span class="dash">-</span> <span class="key">action</span>:
+    <span class="key">call</span>: <span class="string">nk-reschedule.get-order-info</span>
+    <span class="key">inputs</span>:
+      <span class="key">order_id</span>: <span class="string">$order-id</span>
+    <span class="key">on_error</span>:
+      <span class="key">goto</span>: <span class="string">order-system-error-escalation</span>
+    <span class="key">outcomes</span>:
+      <span class="key">order found</span>:
+        <span class="key">goto</span>: <span class="string">check-initial-order-status</span>
+      <span class="key">order not found</span>:
+        <span class="key">goto</span>: <span class="string">order-system-error-escalation</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot ux"></span>
+          Improved UX
+        </div>
+        <div class="panel-body">
+          <div class="chat-mockup">
+            <div class="chat-header">
+              <div class="chat-avatar">AI</div>
+              <div class="chat-info">
+                <div class="chat-name">Delivery Assistant</div>
+                <div class="chat-status">Online</div>
+              </div>
+            </div>
+            <div class="chat-body">
+              <div class="msg msg-user">
+                ORD-2026-78432
+                <div class="msg-time">10:42 AM</div>
+              </div>
+              <div class="msg msg-agent" style="background: var(--bg-secondary); border: 1px solid var(--border);">
+                <div style="display: flex; align-items: center; gap: 0.6rem;">
+                  <div class="loading-dots"><span></span><span></span><span></span></div>
+                  <span style="font-size: 0.8rem; color: var(--text-secondary);">Looking up your order...</span>
+                </div>
+                <div class="progress-bar" style="margin-top: 0.6rem;">
+                  <div class="progress-fill" style="width: 60%;"></div>
+                </div>
+                <div class="msg-time">10:42 AM</div>
+              </div>
+              <div class="msg msg-agent">
+                <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
+                  <span class="status-badge success" role="status">Found</span>
+                </div>
+                <strong>Order #ORD-2026-78432</strong><br>
+                <span style="color: var(--text-secondary); font-size: 0.75rem;">Wireless Headphones - Black</span><br>
+                <span style="color: var(--text-secondary); font-size: 0.75rem;">Est. Delivery: July 21, 2026</span>
+                <div class="msg-time">10:42 AM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="design-note">
+      <h4>UX Improvements</h4>
+      <ul>
+        <li><strong>Loading Skeleton:</strong> Animated dots + progress bar replace dead silence.</li>
+        <li><strong>Outcome Cards:</strong> Success/failure states are visually distinct with color-coded badges &mdash; icon + text label together, never color alone.</li>
+        <li><strong>Contextual Summary:</strong> After the action, show a summary card with fetched data.</li>
+        <li><strong>Error Transparency:</strong> If it fails, show a clear error card with a retry button.</li>
+        <li><strong>Time Stamps:</strong> Every message is timestamped for audit trail and trust.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 3. CHOICE -->
+  <section class="section" id="choice">
+    <div class="section-header">
+      <div class="section-badge choice">Ch</div>
+      <div>
+        <div class="section-title">Choice</div>
+        <div class="section-desc">Present options to the user as interactive, tappable cards</div>
+      </div>
+    </div>
+
+    <div class="comparison-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot yaml"></span>
+          YAML Input
+        </div>
+        <div class="panel-body">
+          <div class="code-block">
+<span class="dash">-</span> <span class="key">choice</span>:
+    <span class="key">prompt</span>: <span class="string">"Would you like me to help reschedule your delivery date, or speak with a human agent?"</span>
+    <span class="key">display</span>: <span class="string">card</span>
+    <span class="key">options</span>:
+      <span class="key">"Speak to a human agent"</span>:
+        <span class="key">goto</span>: <span class="string">human-requested-escalation</span>
+      <span class="key">"Reschedule delivery date"</span>:
+        <span class="key">goto</span>: <span class="string">collect-order-id</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot ux"></span>
+          Improved UX
+        </div>
+        <div class="panel-body">
+          <div class="chat-mockup">
+            <div class="chat-header">
+              <div class="chat-avatar">AI</div>
+              <div class="chat-info">
+                <div class="chat-name">Delivery Assistant</div>
+                <div class="chat-status">Online</div>
+              </div>
+            </div>
+            <div class="chat-body">
+              <div class="msg msg-agent">
+                <strong>What would you like to do?</strong><br><br>
+                I can help you reschedule your delivery, or connect you with a human agent if you prefer.
+                <div class="msg-time">Just now</div>
+              </div>
+              <div class="btn-group" style="margin-top: 0.4rem;" role="group" aria-label="Choose an option">
+                <button class="btn">
+                  <span class="btn-icon" style="background: rgba(99,102,241,0.15); color: var(--accent-light);">Ca</span>
+                  <div>
+                    <div style="font-weight: 600;">Reschedule delivery</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 400;">Pick a new date that works for you</div>
+                  </div>
+                </button>
+                <button class="btn">
+                  <span class="btn-icon" style="background: rgba(239,68,68,0.15); color: var(--error);">Ag</span>
+                  <div>
+                    <div style="font-weight: 600;">Speak to a human agent</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 400;">Connect with support team</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="design-note">
+      <h4>UX Improvements</h4>
+      <ul>
+        <li><strong>Rich Option Cards:</strong> Each option has an icon, title, and subtitle.</li>
+        <li><strong>Visual Hierarchy:</strong> Primary action gets a more prominent visual treatment.</li>
+        <li><strong>Iconography:</strong> Icons provide instant recognition, reducing reading time.</li>
+        <li><strong>Tap Targets:</strong> Full-width cards are easy to tap on mobile.</li>
+        <li><strong>Contextual Framing:</strong> Action-oriented question, not passive text.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 4. CONFIRM -->
+  <section class="section" id="confirm">
+    <div class="section-header">
+      <div class="section-badge confirm">Co</div>
+      <div>
+        <div class="section-title">Confirm</div>
+        <div class="section-desc">Ask for explicit confirmation with a summary card and clear actions</div>
+      </div>
+    </div>
+
+    <div class="comparison-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot yaml"></span>
+          YAML Input
+        </div>
+        <div class="panel-body">
+          <div class="code-block">
+<span class="dash">-</span> <span class="key">confirm</span>:
+    <span class="key">fields</span>:
+      <span class="dash">-</span> <span class="string">chosen-delivery-slot</span>
+    <span class="key">prompt</span>: <span class="string">|-</span>
+      <span class="string">Please confirm the following reschedule:</span>
+      <span class="string">New delivery date: {{chosen-delivery-slot}}</span>
+      <span class="string">Current delivery date: {{current-estimated-delivery}}</span>
+      <span class="string">Shall I go ahead and reschedule?</span>
+    <span class="key">on_change</span>:
+      <span class="key">goto</span>: <span class="string">collect-chosen-date</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot ux"></span>
+          Improved UX
+        </div>
+        <div class="panel-body">
+          <div class="chat-mockup">
+            <div class="chat-header">
+              <div class="chat-avatar">AI</div>
+              <div class="chat-info">
+                <div class="chat-name">Delivery Assistant</div>
+                <div class="chat-status">Online</div>
+              </div>
+            </div>
+            <div class="chat-body">
+              <div class="msg msg-agent">
+                <strong>Please confirm before I proceed</strong><br><br>
+                Here is a summary of the change I am about to make:
+                <div class="msg-time">Just now</div>
+              </div>
+              <div class="confirm-card">
+                <div class="confirm-row">
+                  <span class="label">Order ID</span>
+                  <span class="value">ORD-2026-78432</span>
+                </div>
+                <div class="confirm-row">
+                  <span class="label">Current Date</span>
+                  <span class="value">July 21, 2026</span>
+                </div>
+                <div class="confirm-row">
+                  <span class="label">New Date</span>
+                  <span class="value" style="color: var(--accent-light); font-weight: 700;">July 25, 2026</span>
+                </div>
+                <div class="confirm-row">
+                  <span class="label">Item</span>
+                  <span class="value">Wireless Headphones - Black</span>
+                </div>
+              </div>
+              <div style="display: flex; gap: 0.4rem; margin-top: 0.4rem;">
+                <button class="btn btn-success" style="flex: 1;">Confirm & Reschedule</button>
+                <button class="btn btn-outline" style="flex: 1;">Change Date</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="design-note">
+      <h4>UX Improvements</h4>
+      <ul>
+        <li><strong>Summary Card:</strong> A clean, scannable table replaces a wall of templated text.</li>
+        <li><strong>Visual Delta:</strong> The "New Date" is highlighted in accent color to draw attention.</li>
+        <li><strong>Dual Actions:</strong> "Confirm" is primary (filled), "Change" is secondary (outline).</li>
+        <li><strong>Warning Icon:</strong> Signals this is a point of no return, building caution without fear.</li>
+        <li><strong>Full Context:</strong> Order ID and item name included so user knows exactly what they are confirming.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 5. GUIDE -->
+  <section class="section" id="guide">
+    <div class="section-header">
+      <div class="section-badge guide">Gu</div>
+      <div>
+        <div class="section-title">Guide</div>
+        <div class="section-desc">Provide step-by-step guidance with progress tracking and completion states</div>
+      </div>
+    </div>
+
+    <div class="comparison-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot yaml"></span>
+          YAML Input
+        </div>
+        <div class="panel-body">
+          <div class="code-block">
+<span class="dash">-</span> <span class="key">guide</span>:
+    <span class="key">goal</span>: <span class="string">"Ask the user to type one of the available delivery dates exactly as shown"</span>
+    <span class="key">success</span>:
+      <span class="key">goto</span>: <span class="string">validate-chosen-date</span>
+    <span class="key">instructions</span>:
+      <span class="dash">-</span> <span class="string">"The date you entered does not match any of the available options."</span>
+      <span class="dash">-</span> <span class="string">"Please type one of the following dates exactly as shown:"</span>
+      <span class="dash">-</span> <span class="string">"{{available-delivery-slots}}"</span>
+      <span class="dash">-</span> <span class="string">"Enter the date in the format displayed (for example: 2026-07-14)."</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot ux"></span>
+          Improved UX
+        </div>
+        <div class="panel-body">
+          <div class="chat-mockup">
+            <div class="chat-header">
+              <div class="chat-avatar">AI</div>
+              <div class="chat-info">
+                <div class="chat-name">Delivery Assistant</div>
+                <div class="chat-status">Online</div>
+              </div>
+            </div>
+            <div class="chat-body">
+              <div class="msg msg-agent">
+                <span class="status-badge error" style="margin-bottom: 0.4rem; display: inline-flex;" role="status">Invalid Entry</span><br><br>
+                <strong>That date does not match any available slots.</strong><br><br>
+                Here is how to enter it correctly:
+                <div class="msg-time">Just now</div>
+              </div>
+              <div class="step-list" style="margin-top: 0.4rem;">
+                <div class="step-item completed">
+                  <span class="num">1</span>
+                  Choose from the list below
+                </div>
+                <div class="step-item active">
+                  <span class="num">2</span>
+                  Type the date exactly as shown (e.g. <strong>2026-07-25</strong>)
+                </div>
+                <div class="step-item">
+                  <span class="num">3</span>
+                  Avoid phrases like "tomorrow" or "next week"
+                </div>
+              </div>
+              <div style="margin-top: 0.6rem; padding: 0.6rem; background: var(--bg-secondary); border-radius: 7px; border: 1px dashed var(--border-light);">
+                <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.05em;">Available Dates</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.3rem;" role="group" aria-label="Available dates, tap to fill">
+                  <button class="tag clickable selected" aria-label="Fill in 2026-07-25">2026-07-25</button>
+                  <button class="tag clickable" aria-label="Fill in 2026-07-26">2026-07-26</button>
+                  <button class="tag clickable" aria-label="Fill in 2026-07-28">2026-07-28</button>
+                  <button class="tag clickable" aria-label="Fill in 2026-07-29">2026-07-29</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="design-note">
+      <h4>UX Improvements</h4>
+      <ul>
+        <li><strong>Error Context:</strong> The error badge immediately signals what went wrong.</li>
+        <li><strong>Step-by-Step Progress:</strong> Visual step indicators show where the user is.</li>
+        <li><strong>Interactive Chips:</strong> Available dates are real, keyboard-operable buttons &mdash; tap (or Enter) to auto-fill, distinct from the static hint tags in Collect.</li>
+        <li><strong>Inline Examples:</strong> A concrete example is shown, not just described.</li>
+        <li><strong>Visual Separation:</strong> Available dates in a distinct container with dashed border.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 6. INVESTIGATE -->
+  <section class="section" id="investigate">
+    <div class="section-header">
+      <div class="section-badge investigate">In</div>
+      <div>
+        <div class="section-title">Investigate</div>
+        <div class="section-desc">Use multiple actions to investigate, with a live status dashboard</div>
+      </div>
+    </div>
+
+    <div class="comparison-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot yaml"></span>
+          YAML Input
+        </div>
+        <div class="panel-body">
+          <div class="code-block">
+<span class="dash">-</span> <span class="key">investigate</span>:
+    <span class="key">actions</span>:
+      <span class="dash">-</span> <span class="string">orders.get_details</span>
+      <span class="dash">-</span> <span class="string">payments.get_history</span>
+      <span class="dash">-</span> <span class="string">shipping.get_tracking</span>
+    <span class="key">on_error</span>:
+      <span class="key">goto</span>: <span class="string">investigation-error</span>
+    <span class="key">outcomes</span>:
+      <span class="key">all clear</span>:
+        <span class="key">goto</span>: <span class="string">resolution-found</span>
+      <span class="key">issue detected</span>:
+        <span class="key">goto</span>: <span class="string">escalate-to-human</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot ux"></span>
+          Improved UX
+        </div>
+        <div class="panel-body">
+          <div class="chat-mockup">
+            <div class="chat-header">
+              <div class="chat-avatar">AI</div>
+              <div class="chat-info">
+                <div class="chat-name">Delivery Assistant</div>
+                <div class="chat-status">Online</div>
+              </div>
+            </div>
+            <div class="chat-body">
+              <div class="msg msg-agent">
+                <strong>Investigating your order...</strong><br><br>
+                I am running a few checks to find out what is happening. This will take a moment.
+                <div class="msg-time">Just now</div>
+              </div>
+              <div style="background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; padding: 0.875rem; margin-top: 0.4rem;">
+                <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em;">Investigation Status</div>
+                <div class="step-list">
+                  <div class="step-item completed">
+                    <span class="num">OK</span>
+                    <div style="flex: 1;">
+                      <div style="font-weight: 500; color: var(--text-primary);">Order Details</div>
+                      <div style="font-size: 0.65rem; color: var(--success);">Found - Shipped July 15</div>
+                    </div>
+                    <span class="status-badge success">OK</span>
+                  </div>
+                  <div class="step-item completed">
+                    <span class="num">OK</span>
+                    <div style="flex: 1;">
+                      <div style="font-weight: 500; color: var(--text-primary);">Payment History</div>
+                      <div style="font-size: 0.65rem; color: var(--success);">Payment confirmed</div>
+                    </div>
+                    <span class="status-badge success">OK</span>
+                  </div>
+                  <div class="step-item active">
+                    <span class="num" style="background: var(--accent);">
+                      <div class="loading-dots" style="padding: 0;"><span></span><span></span><span></span></div>
+                    </span>
+                    <div style="flex: 1;">
+                      <div style="font-weight: 500; color: var(--text-primary);">Shipping Tracking</div>
+                      <div style="font-size: 0.65rem; color: var(--accent-light);">Checking carrier data...</div>
+                    </div>
+                    <span class="status-badge info">Running</span>
+                  </div>
+                </div>
+                <div class="progress-bar" style="margin-top: 0.6rem;">
+                  <div class="progress-fill" style="width: 66%;"></div>
+                </div>
+                <div style="text-align: center; font-size: 0.65rem; color: var(--text-muted); margin-top: 0.4rem;">2 of 3 checks complete</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="design-note">
+      <h4>UX Improvements</h4>
+      <ul>
+        <li><strong>Live Dashboard:</strong> A real-time status panel shows each investigation step.</li>
+        <li><strong>Step Completion:</strong> Checkmarks on completed steps, loading on active one.</li>
+        <li><strong>Status Badges:</strong> Icon + text label pairing provides at-a-glance understanding without relying on color alone.</li>
+        <li><strong>Progress Bar:</strong> Visual progress indicator with quantified completion.</li>
+        <li><strong>Detail Expansion:</strong> Each step shows a brief result summary.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 7. IF / ELSE -->
+  <section class="section" id="if">
+    <div class="section-header">
+      <div class="section-badge if">If</div>
+      <div>
+        <div class="section-title">If / Else</div>
+        <div class="section-desc">Conditional branching with clear path visualization</div>
+      </div>
+    </div>
+
+    <div class="comparison-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot yaml"></span>
+          YAML Input
+        </div>
+        <div class="panel-body">
+          <div class="code-block">
+<span class="dash">-</span> <span class="key">if</span>: <span class="string">reschedule-order-status in ['in_transit','delivered','cancelled']</span>
+    <span class="key">else</span>:
+      <span class="key">goto</span>: <span class="string">get-reschedule-slots</span>
+    <span class="key">then</span>:
+      <span class="key">goto</span>: <span class="string">order-not-reschedulable-info</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot ux"></span>
+          Improved UX
+        </div>
+        <div class="panel-body">
+          <div class="chat-mockup">
+            <div class="chat-header">
+              <div class="chat-avatar">AI</div>
+              <div class="chat-info">
+                <div class="chat-name">Delivery Assistant</div>
+                <div class="chat-status">Online</div>
+              </div>
+            </div>
+            <div class="chat-body">
+              <div class="msg msg-agent">
+                <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
+                  <span class="status-badge info" role="status">Checking</span>
+                </div>
+                <strong>Verifying your order status...</strong>
+                <div class="msg-time">10:43 AM</div>
+              </div>
+              <div class="msg msg-agent">
+                <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
+                  <span class="status-badge success" role="status">Eligible</span>
+                </div>
+                <strong>Great news!</strong> Your order is currently <strong>"Processing"</strong>, which means it can be rescheduled.<br><br>
+                Let me fetch the available delivery slots for you.
+                <div class="msg-time">10:43 AM</div>
+              </div>
+              <div style="margin-top: 0.875rem; padding: 0.6rem; border: 1px dashed var(--border); border-radius: 8px; opacity: 0.6;">
+                <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 0.4rem;">Alternative path if not eligible:</div>
+                <div class="msg msg-agent" style="margin: 0;">
+                  <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
+                    <span class="status-badge error">Not Eligible</span>
+                  </div>
+                  Your order status is <strong>"In Transit"</strong>, so it can no longer be rescheduled through this channel.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="design-note">
+      <h4>UX Improvements</h4>
+      <ul>
+        <li><strong>Status Badge Reveal:</strong> The condition check is surfaced as a "Checking..." badge.</li>
+        <li><strong>Branch Visualization:</strong> Actual path shown prominently; alternatives shown faded.</li>
+        <li><strong>Outcome Framing:</strong> "Great news!" vs direct explanation - emotional intelligence.</li>
+        <li><strong>Data Transparency:</strong> The actual status value is shown, not hidden in a variable.</li>
+        <li><strong>Seamless Transition:</strong> Next step introduced naturally after the condition.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 8. ESCALATE -->
+  <section class="section" id="escalate">
+    <div class="section-header">
+      <div class="section-badge escalate">Es</div>
+      <div>
+        <div class="section-title">Escalate</div>
+        <div class="section-desc">Hand off to a human with context preservation and wait-time transparency</div>
+      </div>
+    </div>
+
+    <div class="comparison-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot yaml"></span>
+          YAML Input
+        </div>
+        <div class="panel-body">
+          <div class="code-block">
+<span class="dash">-</span> <span class="key">escalate</span>:
+    <span class="key">to</span>: <span class="string">human</span>
+    <span class="key">message</span>: <span class="string">"Your order status has changed to {{reschedule-order-status}} since we began this conversation, which means the reschedule can no longer be completed. A member of our support team will be able to assist you with next steps."</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot ux"></span>
+          Improved UX
+        </div>
+        <div class="panel-body">
+          <div class="chat-mockup">
+            <div class="chat-header">
+              <div class="chat-avatar">AI</div>
+              <div class="chat-info">
+                <div class="chat-name">Delivery Assistant</div>
+                <div class="chat-status" style="color: var(--warning);">Handing off...</div>
+              </div>
+            </div>
+            <div class="chat-body">
+              <div class="info-card" style="border-color: var(--error);">
+                <div class="icon" style="background: rgba(239,68,68,0.15); color: var(--error);">!</div>
+                <div>
+                  <h4 style="color: var(--error);">Status Changed During Chat</h4>
+                  <p>Your order status changed to <strong>"In Transit"</strong> while we were talking. This means it can no longer be rescheduled automatically.</p>
+                </div>
+              </div>
+              <div class="msg msg-agent">
+                <strong>I am connecting you with a human agent</strong> who can help with next steps. Here is what I have gathered so far:
+                <div class="msg-time">Just now</div>
+              </div>
+              <div style="background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; padding: 0.875rem; margin-top: 0.4rem;">
+                <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em;">Conversation Summary for Agent</div>
+                <div class="confirm-row">
+                  <span class="label">Order ID</span>
+                  <span class="value">ORD-2026-78432</span>
+                </div>
+                <div class="confirm-row">
+                  <span class="label">Original Request</span>
+                  <span class="value">Reschedule to July 25</span>
+                </div>
+                <div class="confirm-row">
+                  <span class="label">Status at Start</span>
+                  <span class="value">Processing</span>
+                </div>
+                <div class="confirm-row">
+                  <span class="label">Current Status</span>
+                  <span class="value" style="color: var(--error);">In Transit</span>
+                </div>
+                <div class="confirm-row">
+                  <span class="label">Issue</span>
+                  <span class="value">Auto-reschedule blocked</span>
+                </div>
+              </div>
+              <div style="margin-top: 0.6rem; padding: 0.75rem; background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.04)); border-radius: 8px; border: 1px solid var(--border); display: flex; align-items: center; gap: 0.6rem;">
+                <div class="loading-dots"><span></span><span></span><span></span></div>
+                <div>
+                  <div style="font-size: 0.8rem; font-weight: 600;">Finding the next available agent...</div>
+                  <div style="font-size: 0.7rem; color: var(--text-muted);">Estimated wait: <strong style="color: var(--accent-light);">2 minutes</strong></div>
+                </div>
+              </div>
+              <div style="margin-top: 0.4rem; text-align: center;">
+                <button class="btn btn-outline" style="font-size: 0.75rem; padding: 0.4rem 0.875rem;">Email me a transcript</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="design-note">
+      <h4>UX Improvements</h4>
+      <ul>
+        <li><strong>Context Preservation:</strong> A full conversation summary is passed to the human agent - no repeating yourself.</li>
+        <li><strong>Why Explanation:</strong> The reason for escalation is front and center, not buried in a message template.</li>
+        <li><strong>Wait-Time Transparency:</strong> "Estimated wait: 2 minutes" sets expectations and reduces anxiety.</li>
+        <li><strong>Transcript Option:</strong> Users can request an email transcript for their records.</li>
+        <li><strong>Visual Handoff:</strong> The agent status changes to "Handing off..." signaling the transition.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 9. DONE -->
+  <section class="section" id="done">
+    <div class="section-header">
+      <div class="section-badge done">Do</div>
+      <div>
+        <div class="section-title">Done</div>
+        <div class="section-desc">Close the conversation with confirmation, next steps, and satisfaction tracking</div>
+      </div>
+    </div>
+
+    <div class="comparison-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot yaml"></span>
+          YAML Input
+        </div>
+        <div class="panel-body">
+          <div class="code-block">
+<span class="dash">-</span> <span class="key">done</span>:
+    <span class="key">message</span>: <span class="string">"Your delivery has been successfully rescheduled. Your new delivery date is {{chosen-delivery-slot}}. You will receive a confirmation shortly. If there is anything else I can help you with, please let me know."</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot ux"></span>
+          Improved UX
+        </div>
+        <div class="panel-body">
+          <div class="chat-mockup">
+            <div class="chat-header">
+              <div class="chat-avatar">AI</div>
+              <div class="chat-info">
+                <div class="chat-name">Delivery Assistant</div>
+                <div class="chat-status">Online</div>
+              </div>
+            </div>
+            <div class="chat-body">
+              <div class="info-card" style="border-color: var(--success); background: linear-gradient(135deg, rgba(34,197,94,0.08), rgba(34,197,94,0.02));">
+                <div class="icon" style="background: rgba(34,197,94,0.15); color: var(--success);">OK</div>
+                <div>
+                  <h4 style="color: var(--success);">Reschedule Confirmed!</h4>
+                  <p>Your delivery has been successfully rescheduled.</p>
+                </div>
+              </div>
+              <div class="confirm-card">
+                <div class="confirm-row">
+                  <span class="label">Order ID</span>
+                  <span class="value">ORD-2026-78432</span>
+                </div>
+                <div class="confirm-row">
+                  <span class="label">New Delivery Date</span>
+                  <span class="value" style="color: var(--success); font-weight: 700;">July 25, 2026</span>
+                </div>
+                <div class="confirm-row">
+                  <span class="label">Confirmation</span>
+                  <span class="value">Sent to your email</span>
+                </div>
+              </div>
+              <div class="msg msg-agent">
+                <strong>Is there anything else I can help you with?</strong><br><br>
+                You can also track your order anytime from your account dashboard.
+                <div class="msg-time">Just now</div>
+              </div>
+              <div class="btn-group" style="margin-top: 0.4rem;">
+                <button class="btn btn-outline" style="justify-content: center;">Track my order</button>
+                <button class="btn btn-outline" style="justify-content: center;">Start a new request</button>
+                <button class="btn btn-outline" style="justify-content: center;">No, I am all set</button>
+              </div>
+              <div style="margin-top: 0.75rem; padding: 0.75rem; background: var(--bg-secondary); border-radius: 8px; text-align: center;">
+                <div style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.4rem;">How was your experience?</div>
+                <div class="rating-scale" role="radiogroup" aria-label="Rate your experience">
+                  <button role="radio" aria-checked="false" aria-label="Very dissatisfied">&#128542;</button>
+                  <button role="radio" aria-checked="false" aria-label="Dissatisfied">&#128528;</button>
+                  <button role="radio" aria-checked="true" aria-label="Satisfied">&#128512;</button>
+                  <button role="radio" aria-checked="false" aria-label="Very satisfied">&#128525;</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="design-note">
+      <h4>UX Improvements</h4>
+      <ul>
+        <li><strong>Success Celebration:</strong> A prominent success card with checkmark replaces a plain text message.</li>
+        <li><strong>Confirmation Summary:</strong> A scannable card shows the final outcome, not buried in prose.</li>
+        <li><strong>Next Steps:</strong> Action buttons for common follow-ups (track order, new request) keep the user engaged.</li>
+        <li><strong>Accessible Rating Scale:</strong> Each emoji is a real <code>role="radio"</code> button with its own <code>aria-label</code> (e.g. "Very dissatisfied") &mdash; a screen reader user isn't left guessing what a bare emoji glyph means.</li>
+        <li><strong>Graceful Close:</strong> "No, I am all set" provides a clear exit path, reducing abandonment anxiety.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 10. WHILE -->
+  <section class="section" id="while">
+    <div class="section-header">
+      <div class="section-badge while">Wh</div>
+      <div>
+        <div class="section-title">While</div>
+        <div class="section-desc">Loop until a condition is met, with iteration counter and progress indication</div>
+      </div>
+    </div>
+
+    <div class="comparison-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot yaml"></span>
+          YAML Input
+        </div>
+        <div class="panel-body">
+          <div class="code-block">
+<span class="dash">-</span> <span class="key">while</span>:
+    <span class="key">condition</span>: <span class="string">"user_input not in available-delivery-slots"</span>
+    <span class="key">max_iterations</span>: <span class="string">3</span>
+    <span class="key">body</span>:
+      <span class="dash">-</span> <span class="key">guide</span>:
+          <span class="key">goal</span>: <span class="string">"Re-prompt for correct date format"</span>
+          <span class="key">instructions</span>:
+            <span class="dash">-</span> <span class="string">"The date you entered is not valid."</span>
+            <span class="dash">-</span> <span class="string">"Please choose from: {{available-delivery-slots}}"</span>
+      <span class="dash">-</span> <span class="key">collect</span>:
+          <span class="key">fields</span>:
+            <span class="dash">-</span> <span class="string">user_input</span>
+    <span class="key">on_max_iterations</span>:
+      <span class="key">goto</span>: <span class="string">escalate-to-human</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot ux"></span>
+          Improved UX
+        </div>
+        <div class="panel-body">
+          <div class="chat-mockup">
+            <div class="chat-header">
+              <div class="chat-avatar">AI</div>
+              <div class="chat-info">
+                <div class="chat-name">Delivery Assistant</div>
+                <div class="chat-status">Online</div>
+              </div>
+            </div>
+            <div class="chat-body">
+              <div class="msg msg-user">
+                tomorrow
+                <div class="msg-time">10:45 AM</div>
+              </div>
+              <div class="msg msg-agent">
+                <span class="status-badge error" style="margin-bottom: 0.4rem; display: inline-flex;" role="status">Invalid</span><br>
+                <strong>That date is not available.</strong> Please choose from the list below.<br><br>
+                <span style="color: var(--text-muted); font-size: 0.75rem;">Attempt <strong>1 of 3</strong></span>
+                <div class="msg-time">10:45 AM</div>
+              </div>
+              <div style="margin-top: 0.4rem; padding: 0.6rem; background: var(--bg-secondary); border-radius: 7px; border: 1px dashed var(--border-light);">
+                <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.05em;">Available Dates</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.3rem;" role="group" aria-label="Available dates, tap to fill">
+                  <button class="tag clickable" aria-label="Fill in 2026-07-25">2026-07-25</button>
+                  <button class="tag clickable" aria-label="Fill in 2026-07-26">2026-07-26</button>
+                  <button class="tag clickable" aria-label="Fill in 2026-07-28">2026-07-28</button>
+                </div>
+              </div>
+              <div style="margin-top: 0.6rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                  <div class="progress-bar" style="flex: 1; margin: 0;">
+                    <div class="progress-fill" style="width: 33%;"></div>
+                  </div>
+                  <span style="font-size: 0.65rem; color: var(--text-muted);">1/3</span>
+                </div>
+                <div style="font-size: 0.7rem; color: var(--text-muted);">After 3 attempts, I will connect you with a human agent.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="design-note">
+      <h4>UX Improvements</h4>
+      <ul>
+        <li><strong>Iteration Counter:</strong> "Attempt 1 of 3" sets clear expectations and reduces frustration.</li>
+        <li><strong>Progress Bar:</strong> Visual indicator shows how many attempts remain before escalation.</li>
+        <li><strong>Graceful Degradation:</strong> User is warned upfront that escalation will happen after max attempts.</li>
+        <li><strong>Interactive Chips:</strong> Available dates as real, focusable buttons reduce typing errors in loops.</li>
+        <li><strong>Error Context:</strong> Each loop iteration shows what was wrong and how to fix it, not just "try again."</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 11. FOREACH -->
+  <section class="section" id="foreach">
+    <div class="section-header">
+      <div class="section-badge foreach">Fo</div>
+      <div>
+        <div class="section-title">Foreach</div>
+        <div class="section-desc">Iterate over a collection with item cards and batch action controls</div>
+      </div>
+    </div>
+
+    <div class="comparison-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot yaml"></span>
+          YAML Input
+        </div>
+        <div class="panel-body">
+          <div class="code-block">
+<span class="dash">-</span> <span class="key">foreach</span>:
+    <span class="key">collection</span>: <span class="string">$available-delivery-slots</span>
+    <span class="key">as</span>: <span class="string">slot</span>
+    <span class="key">body</span>:
+      <span class="dash">-</span> <span class="key">action</span>:
+          <span class="key">call</span>: <span class="string">nk-reschedule.check-slot-availability</span>
+          <span class="key">inputs</span>:
+            <span class="key">date</span>: <span class="string">$slot</span>
+          <span class="key">outcomes</span>:
+            <span class="key">available</span>:
+              <span class="key">goto</span>: <span class="string">add-to-valid-slots</span>
+            <span class="key">unavailable</span>:
+              <span class="key">goto</span>: <span class="string">skip-slot</span>
+    <span class="key">on_complete</span>:
+      <span class="key">goto</span>: <span class="string">show-valid-slots</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <span class="dot ux"></span>
+          Improved UX
+        </div>
+        <div class="panel-body">
+          <div class="chat-mockup">
+            <div class="chat-header">
+              <div class="chat-avatar">AI</div>
+              <div class="chat-info">
+                <div class="chat-name">Delivery Assistant</div>
+                <div class="chat-status">Online</div>
+              </div>
+            </div>
+            <div class="chat-body">
+              <div class="msg msg-agent">
+                <strong>Checking available delivery slots...</strong><br><br>
+                I am verifying each date with our delivery partners. This will just take a moment.
+                <div class="msg-time">Just now</div>
+              </div>
+              <div style="background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; padding: 0.875rem; margin-top: 0.4rem;">
+                <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em;">Slot Availability</div>
+                <div class="step-list">
+                  <div class="step-item completed">
+                    <span class="num">OK</span>
+                    <div style="flex: 1;">
+                      <div style="font-weight: 500; color: var(--text-primary);">Monday, July 25</div>
+                      <div style="font-size: 0.65rem; color: var(--success);">Morning & Afternoon available</div>
+                    </div>
+                    <span class="status-badge success">Open</span>
+                  </div>
+                  <div class="step-item completed">
+                    <span class="num">OK</span>
+                    <div style="flex: 1;">
+                      <div style="font-weight: 500; color: var(--text-primary);">Tuesday, July 26</div>
+                      <div style="font-size: 0.65rem; color: var(--success);">Morning available</div>
+                    </div>
+                    <span class="status-badge success">Open</span>
+                  </div>
+                  <div class="step-item active">
+                    <span class="num" style="background: var(--accent);">
+                      <div class="loading-dots" style="padding: 0;"><span></span><span></span><span></span></div>
+                    </span>
+                    <div style="flex: 1;">
+                      <div style="font-weight: 500; color: var(--text-primary);">Wednesday, July 27</div>
+                      <div style="font-size: 0.65rem; color: var(--accent-light);">Checking carrier capacity...</div>
+                    </div>
+                    <span class="status-badge info">Checking</span>
+                  </div>
+                  <div class="step-item">
+                    <span class="num" style="background: var(--bg-tertiary); color: var(--text-muted);">-</span>
+                    <div style="flex: 1;">
+                      <div style="font-weight: 500; color: var(--text-muted);">Thursday, July 28</div>
+                      <div style="font-size: 0.65rem; color: var(--text-muted);">Pending check</div>
+                    </div>
+                    <span class="status-badge" style="background: var(--bg-tertiary); color: var(--text-muted);">Wait</span>
+                  </div>
+                </div>
+                <div class="progress-bar" style="margin-top: 0.6rem;">
+                  <div class="progress-fill" style="width: 50%;"></div>
+                </div>
+                <div style="text-align: center; font-size: 0.65rem; color: var(--text-muted); margin-top: 0.4rem;">2 of 4 slots verified</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="design-note">
+      <h4>UX Improvements</h4>
+      <ul>
+        <li><strong>Item Cards:</strong> Each collection item is rendered as a card with status, not a plain list.</li>
+        <li><strong>Live Verification:</strong> Each slot shows real-time availability status as it is checked.</li>
+        <li><strong>Batch Progress:</strong> "2 of 4 slots verified" quantifies progress through the collection.</li>
+        <li><strong>Detail Expansion:</strong> Available slots show time-of-day options (Morning, Afternoon).</li>
+        <li><strong>Visual States:</strong> Completed, active, and pending items have distinct visual treatments.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <div class="section" style="margin-bottom: 2rem; text-align: center; padding: 2rem; border-top: 1px solid var(--border);">
+    <div style="font-size: 0.8rem; color: var(--text-muted);">
+      Agent Behavior UX Rework &mdash; Design System v1.0<br>
+      Built for deterministic agent flows with human-centered interaction design.
+    </div>
+  </div>
+
+</main>
+
+<script>
+// Smooth scroll for nav links
+document.querySelectorAll('.nav-item').forEach(link => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.querySelectorAll('.nav-item').forEach(l => l.classList.remove('active'));
+      this.classList.add('active');
+    }
+  });
+});
+
+// Active section highlighting on scroll
+const sections = document.querySelectorAll('.section[id]');
+const navItems = document.querySelectorAll('.nav-item');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(section => {
+    const sectionTop = section.offsetTop;
+    if (scrollY >= sectionTop - 150) {
+      current = section.getAttribute('id');
+    }
+  });
+  navItems.forEach(item => {
+    item.classList.remove('active');
+    if (item.getAttribute('href') === '#' + current) {
+      item.classList.add('active');
+    }
+  });
+});
+
+// Standalone accessible rating-scale toggle (Done section's static example)
+document.querySelectorAll('.rating-scale').forEach(group => {
+  const buttons = group.querySelectorAll('button[role="radio"]');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.setAttribute('aria-checked', 'false'));
+      btn.setAttribute('aria-checked', 'true');
+    });
+  });
+});
+
+// ---- Live Demo: scripted dummy conversation ----
+(function () {
+  const body = document.getElementById('demo-body');
+  const playBtn = document.getElementById('demo-play');
+  const statusEl = document.getElementById('demo-status');
+  const hintEl = document.getElementById('demo-hint');
+
+  function el(html) {
+    const wrap = document.createElement('div');
+    wrap.innerHTML = html.trim();
+    return wrap.firstElementChild;
+  }
+
+  function scrollDown() {
+    body.scrollTop = body.scrollHeight;
+  }
+
+  function agentMsg(html, extraStyle) {
+    return el(`<div class="msg msg-agent"${extraStyle ? ` style="${extraStyle}"` : ''}>${html}<div class="msg-time">Just now</div></div>`);
+  }
+
+  function userMsg(text) {
+    return el(`<div class="msg msg-user">${text}<div class="msg-time">Just now</div></div>`);
+  }
+
+  function loadingMsg(text) {
+    return el(`
+      <div class="msg msg-agent" style="background: var(--bg-secondary); border: 1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:0.6rem;">
+          <div class="loading-dots"><span></span><span></span><span></span></div>
+          <span style="font-size:0.8rem;color:var(--text-secondary);">${text}</span>
+        </div>
+        <div class="progress-bar" style="margin-top:0.6rem;"><div class="progress-fill" style="width:0%;"></div></div>
+      </div>
+    `);
+  }
+
+  // The scripted steps. Each step is a function(done) that appends to the
+  // transcript and calls done() when it's ready for the next step. All data
+  // is dummy — no network calls are made anywhere in this demo.
+  const steps = [
+    (next) => {
+      statusEl.textContent = 'Online';
+      body.appendChild(agentMsg(
+        `<strong>Let's find your order</strong><br><br>
+         To help you reschedule, please enter your <strong>Order ID</strong> below.<br><br>
+         <span style="color:var(--text-muted);font-size:0.75rem;">Tip: check your confirmation email or "My Orders".</span>`
+      ));
+      const hints = el(`<div style="display:flex;gap:0.4rem;flex-wrap:wrap;" role="group" aria-label="Hints">
+        <span class="tag">From email</span><span class="tag">My Orders</span></div>`);
+      body.appendChild(hints);
+      scrollDown();
+      setTimeout(next, 900);
+    },
+    (next) => {
+      body.appendChild(userMsg('ORD-2026-78432'));
+      scrollDown();
+      setTimeout(next, 500);
+    },
+    (next) => {
+      const loading = loadingMsg('Looking up your order...');
+      body.appendChild(loading);
+      scrollDown();
+      const fill = loading.querySelector('.progress-fill');
+      requestAnimationFrame(() => { fill.style.width = '100%'; });
+      setTimeout(() => {
+        loading.remove();
+        body.appendChild(agentMsg(
+          `<div style="margin-bottom:0.4rem;"><span class="status-badge success" role="status">Found</span></div>
+           <strong>Order #ORD-2026-78432</strong><br>
+           <span style="color:var(--text-secondary);font-size:0.75rem;">Wireless Headphones - Black</span><br>
+           <span style="color:var(--text-secondary);font-size:0.75rem;">Est. Delivery: July 21, 2026</span>`
+        ));
+        scrollDown();
+        next();
+      }, 1100);
+    },
+    (next) => {
+      body.appendChild(agentMsg(`<span class="status-badge info" role="status">Checking</span><br><br><strong>Verifying your order status...</strong>`));
+      scrollDown();
+      setTimeout(next, 900);
+    },
+    (next) => {
+      body.appendChild(agentMsg(
+        `<div style="margin-bottom:0.4rem;"><span class="status-badge success" role="status">Eligible</span></div>
+         <strong>Great news!</strong> Your order is currently "Processing", so it can be rescheduled.<br><br>
+         What new date works for you?`
+      ));
+      scrollDown();
+      setTimeout(next, 900);
+    },
+    (next) => {
+      body.appendChild(userMsg('tomorrow'));
+      scrollDown();
+      setTimeout(next, 500);
+    },
+    (next) => {
+      body.appendChild(agentMsg(
+        `<span class="status-badge error" role="status" style="margin-bottom:0.4rem;display:inline-flex;">Invalid Entry</span><br><br>
+         <strong>That date does not match any available slots.</strong><br>
+         <span style="color:var(--text-muted);font-size:0.75rem;">Attempt <strong>1 of 3</strong></span>`
+      ));
+      const chips = el(`
+        <div style="padding:0.6rem;background:var(--bg-secondary);border-radius:7px;border:1px dashed var(--border-light);">
+          <div style="font-size:0.65rem;color:var(--text-muted);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.05em;">Available Dates</div>
+          <div style="display:flex;flex-wrap:wrap;gap:0.3rem;" role="group" aria-label="Available dates, tap to fill" id="demo-chips">
+            <button class="tag clickable" aria-label="Fill in 2026-07-25">2026-07-25</button>
+            <button class="tag clickable" aria-label="Fill in 2026-07-26">2026-07-26</button>
+            <button class="tag clickable" aria-label="Fill in 2026-07-28">2026-07-28</button>
+          </div>
+        </div>
+      `);
+      body.appendChild(chips);
+      scrollDown();
+      setTimeout(next, 1100);
+    },
+    (next) => {
+      // Simulate tapping the first chip: it visibly selects, then the user
+      // "sends" that value as their next message — showing the chip-group
+      // primitive's auto-fill behavior end to end.
+      const chip = document.querySelector('#demo-chips .tag.clickable');
+      if (chip) chip.classList.add('selected');
+      scrollDown();
+      setTimeout(() => {
+        body.appendChild(userMsg('2026-07-25'));
+        scrollDown();
+        next();
+      }, 700);
+    },
+    (next) => {
+      body.appendChild(agentMsg(
+        `<strong>Please confirm before I proceed</strong><br><br>Here is a summary of the change:`
+      ));
+      const card = el(`
+        <div class="confirm-card">
+          <div class="confirm-row"><span class="label">Order ID</span><span class="value">ORD-2026-78432</span></div>
+          <div class="confirm-row"><span class="label">Current Date</span><span class="value">July 21, 2026</span></div>
+          <div class="confirm-row"><span class="label">New Date</span><span class="value" style="color:var(--accent-light);font-weight:700;">July 25, 2026</span></div>
+          <div class="confirm-row"><span class="label">Item</span><span class="value">Wireless Headphones - Black</span></div>
+        </div>
+      `);
+      body.appendChild(card);
+      const actions = el(`
+        <div style="display:flex;gap:0.4rem;">
+          <button class="btn btn-success" style="flex:1;" disabled>Confirm & Reschedule</button>
+          <button class="btn btn-outline" style="flex:1;" disabled>Change Date</button>
+        </div>
+      `);
+      body.appendChild(actions);
+      scrollDown();
+      setTimeout(next, 1200);
+    },
+    (next) => {
+      body.appendChild(userMsg('Confirm & Reschedule'));
+      scrollDown();
+      setTimeout(next, 700);
+    },
+    (next) => {
+      statusEl.textContent = 'Online';
+      const success = el(`
+        <div class="info-card" style="border-color:var(--success);background:linear-gradient(135deg, rgba(34,197,94,0.08), rgba(34,197,94,0.02));">
+          <div class="icon" style="background: rgba(34,197,94,0.15); color: var(--success);">OK</div>
+          <div><h4 style="color:var(--success);">Reschedule Confirmed!</h4><p>Your delivery has been successfully rescheduled.</p></div>
+        </div>
+      `);
+      body.appendChild(success);
+      const card = el(`
+        <div class="confirm-card">
+          <div class="confirm-row"><span class="label">Order ID</span><span class="value">ORD-2026-78432</span></div>
+          <div class="confirm-row"><span class="label">New Delivery Date</span><span class="value" style="color:var(--success);font-weight:700;">July 25, 2026</span></div>
+          <div class="confirm-row"><span class="label">Confirmation</span><span class="value">Sent to your email</span></div>
+        </div>
+      `);
+      body.appendChild(card);
+      const rating = el(`
+        <div style="padding:0.75rem;background:var(--bg-secondary);border-radius:8px;text-align:center;">
+          <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.4rem;">How was your experience?</div>
+          <div class="rating-scale" role="radiogroup" aria-label="Rate your experience">
+            <button role="radio" aria-checked="false" aria-label="Very dissatisfied">&#128542;</button>
+            <button role="radio" aria-checked="false" aria-label="Dissatisfied">&#128528;</button>
+            <button role="radio" aria-checked="false" aria-label="Satisfied">&#128512;</button>
+            <button role="radio" aria-checked="false" aria-label="Very satisfied">&#128525;</button>
+          </div>
+        </div>
+      `);
+      const buttons = rating.querySelectorAll('button[role="radio"]');
+      buttons.forEach(btn => btn.addEventListener('click', () => {
+        buttons.forEach(b => b.setAttribute('aria-checked', 'false'));
+        btn.setAttribute('aria-checked', 'true');
+      }));
+      body.appendChild(rating);
+      scrollDown();
+      hintEl.textContent = 'Conversation complete. Press Play to replay from the start.';
+      next();
+    },
+  ];
+
+  function play() {
+    playBtn.disabled = true;
+    playBtn.textContent = '... Playing';
+    body.innerHTML = '';
+    statusEl.textContent = 'Typing...';
+    hintEl.textContent = 'Replaying the scripted conversation (dummy data, no real API calls)...';
+
+    let i = 0;
+    function runNext() {
+      if (i >= steps.length) {
+        playBtn.disabled = false;
+        playBtn.textContent = '▶ Play Conversation';
+        return;
+      }
+      const step = steps[i++];
+      step(runNext);
+    }
+    runNext();
+  }
+
+  playBtn.addEventListener('click', play);
+})();
+</script>
+
+</body>
+</html>
