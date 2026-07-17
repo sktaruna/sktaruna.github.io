@@ -21,6 +21,7 @@ import TopBar from './components/TopBar'
 import Palette from './components/Palette'
 import ConfigPanel from './components/ConfigPanel/ConfigPanel'
 import TracePanel from './components/TracePanel/TracePanel'
+import BehaviorChat from './components/BehaviorChat/BehaviorChat'
 import './App.css'
 
 const nodeTypes = { capNode: CapNode }
@@ -36,6 +37,7 @@ function buildInitialMapByExample(value) {
 }
 
 export default function App() {
+  const [viewMode, setViewMode] = useState('graph')
   const [exampleKey, setExampleKey] = useState(DEFAULT_EXAMPLE_KEY)
   const [graphsByExample, setGraphsByExample] = useState(buildInitialGraphsByExample)
   const [selectionByExample, setSelectionByExample] = useState(() => buildInitialMapByExample(null))
@@ -278,54 +280,62 @@ export default function App() {
         onReset={handleReset}
         activeExampleKey={exampleKey}
         onExampleChange={setExampleKey}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
       />
-      <div className="app-body">
-        <Palette onAdd={handleAddNode} />
-        <div className="canvas-wrap">
-          <EdgeMarkers />
-          <ReactFlow
-            key={exampleKey}
-            nodes={renderedNodes}
-            edges={renderedEdges}
-            nodeTypes={nodeTypes}
-            edgeTypes={edgeTypes}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onReconnect={onReconnect}
-            onNodeClick={onNodeClick}
-            onPaneClick={onPaneClick}
-            fitView
-            fitViewOptions={{ padding: 0.25 }}
-            minZoom={0.2}
-            maxZoom={1.5}
-            proOptions={{ hideAttribution: true }}
-          >
-            <Background variant={BackgroundVariant.Dots} gap={22} size={1.4} color="var(--grid-dot)" />
-          </ReactFlow>
+      {viewMode === 'chat' ? (
+        <div className="app-body">
+          <BehaviorChat />
         </div>
-        {trace.status === 'idle' ? (
-          <ConfigPanel
-            node={selectedNode}
-            nodes={nodes}
-            edges={edges}
-            onUpdateLabel={(label) => setNodes((nds) => updateNodeData(nds, selectedNodeId, { label }))}
-            onUpdateConfig={(patch) => setNodes((nds) => updateNodeConfig(nds, selectedNodeId, patch))}
-            onDelete={handleDeleteSelected}
-            graphOps={configGraphOps}
-          />
-        ) : (
-          <TracePanel
-            status={trace.status}
-            activeNode={activeNode}
-            datapoints={trace.datapoints}
-            history={trace.history}
-            askDraft={trace.askDraft}
-            onAskDraftChange={handleAskDraftChange}
-            onEditDatapoint={handleEditDatapoint}
-          />
-        )}
-      </div>
+      ) : (
+        <div className="app-body">
+          <Palette onAdd={handleAddNode} />
+          <div className="canvas-wrap">
+            <EdgeMarkers />
+            <ReactFlow
+              key={exampleKey}
+              nodes={renderedNodes}
+              edges={renderedEdges}
+              nodeTypes={nodeTypes}
+              edgeTypes={edgeTypes}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              onReconnect={onReconnect}
+              onNodeClick={onNodeClick}
+              onPaneClick={onPaneClick}
+              fitView
+              fitViewOptions={{ padding: 0.25 }}
+              minZoom={0.2}
+              maxZoom={1.5}
+              proOptions={{ hideAttribution: true }}
+            >
+              <Background variant={BackgroundVariant.Dots} gap={22} size={1.4} color="var(--grid-dot)" />
+            </ReactFlow>
+          </div>
+          {trace.status === 'idle' ? (
+            <ConfigPanel
+              node={selectedNode}
+              nodes={nodes}
+              edges={edges}
+              onUpdateLabel={(label) => setNodes((nds) => updateNodeData(nds, selectedNodeId, { label }))}
+              onUpdateConfig={(patch) => setNodes((nds) => updateNodeConfig(nds, selectedNodeId, patch))}
+              onDelete={handleDeleteSelected}
+              graphOps={configGraphOps}
+            />
+          ) : (
+            <TracePanel
+              status={trace.status}
+              activeNode={activeNode}
+              datapoints={trace.datapoints}
+              history={trace.history}
+              askDraft={trace.askDraft}
+              onAskDraftChange={handleAskDraftChange}
+              onEditDatapoint={handleEditDatapoint}
+            />
+          )}
+        </div>
+      )}
     </div>
   )
 }

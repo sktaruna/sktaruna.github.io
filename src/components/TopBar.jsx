@@ -8,7 +8,7 @@ const STATUS_LABEL = {
   escalated: 'Escalated',
 }
 
-export default function TopBar({ status, onStart, onStep, onReset, activeExampleKey, onExampleChange }) {
+export default function TopBar({ status, onStart, onStep, onReset, activeExampleKey, onExampleChange, viewMode, onViewModeChange }) {
   const running = status !== 'idle'
   return (
     <header className="top-bar">
@@ -20,9 +20,24 @@ export default function TopBar({ status, onStart, onStep, onReset, activeExample
         </div>
       </div>
 
-      <ExampleSwitcher activeKey={activeExampleKey} onChange={onExampleChange} />
+      <div className="top-bar__mode-switch" role="group" aria-label="View mode">
+        <button
+          className={`top-bar__mode-btn ${viewMode === 'graph' ? 'top-bar__mode-btn--active' : ''}`}
+          onClick={() => onViewModeChange('graph')}
+        >
+          Graph Editor
+        </button>
+        <button
+          className={`top-bar__mode-btn ${viewMode === 'chat' ? 'top-bar__mode-btn--active' : ''}`}
+          onClick={() => onViewModeChange('chat')}
+        >
+          Agent Behavior Demo
+        </button>
+      </div>
 
-      <div className="top-bar__controls">
+      {viewMode === 'graph' && <ExampleSwitcher activeKey={activeExampleKey} onChange={onExampleChange} />}
+
+      {viewMode === 'graph' && <div className="top-bar__controls">
         <span className={`top-bar__status top-bar__status--${status}`}>
           <span className="top-bar__status-dot" />
           {STATUS_LABEL[status]}
@@ -43,7 +58,7 @@ export default function TopBar({ status, onStart, onStep, onReset, activeExample
         <button className="top-bar__btn" onClick={onReset} disabled={status === 'idle'}>
           ↺ Reset
         </button>
-      </div>
+      </div>}
     </header>
   )
 }
