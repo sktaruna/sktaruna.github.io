@@ -7,7 +7,7 @@ const STATUS_LABEL = {
   escalated: 'Escalated',
 }
 
-export default function TopBar({ status, onStart, onStep, onReset, viewMode, onViewModeChange }) {
+export default function TopBar({ status, onStart, onStep, onReset, onTidyLayout, viewMode, onViewModeChange }) {
   const running = status !== 'idle'
   return (
     <header className="top-bar">
@@ -54,6 +54,9 @@ export default function TopBar({ status, onStart, onStep, onReset, viewMode, onV
         )}
         <button className="top-bar__btn" onClick={onReset} disabled={status === 'idle'}>
           ↺ Reset
+        </button>
+        <button className="top-bar__btn" onClick={onTidyLayout} title="Auto-arrange the canvas top to bottom">
+          ✨ Tidy Layout
         </button>
       </div>}
     </header>

@@ -1,8 +1,9 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { ReactFlow, Background, BackgroundVariant, applyNodeChanges, applyEdgeChanges, reconnectEdge } from '@xyflow/react'
 import { PRIMITIVES } from './primitives/registry'
 import { EXAMPLES, DEFAULT_EXAMPLE_KEY } from './graph/examples'
 import { createNode, removeNode, updateNodeData, updateNodeConfig, setInlineTarget, addOrReplaceEdge } from './graph/graphOps'
+import { layoutTopToBottom } from './graph/autoLayout'
 import { findEntryNodeId, draftValueFor, step as traceStep } from './trace/traceEngine'
 import CapNode from './components/nodes/CapNode'
 import CapEdge from './components/edges/CapEdge'
@@ -139,6 +140,17 @@ export default function App() {
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId) || null
 
+  const reactFlowRef = useRef(null)
+  const handleTidyLayout = useCallback(() => {
+    const measuredNodes = reactFlowRef.current?.getNodes() || nodes
+    setNodes((nds) => {
+      const laidOut = layoutTopToBottom(measuredNodes, edges)
+      const positionById = new Map(laidOut.map((n) => [n.id, n.position]))
+      return nds.map((n) => (positionById.has(n.id) ? { ...n, position: positionById.get(n.id) } : n))
+    })
+    requestAnimationFrame(() => reactFlowRef.current?.fitView({ padding: 0.25 }))
+  }, [nodes, edges, setNodes])
+
   // ---------- Trace execution ----------
 
   const handleStart = useCallback(() => {
@@ -252,6 +264,7 @@ export default function App() {
         onStart={handleStart}
         onStep={handleStep}
         onReset={handleReset}
+        onTidyLayout={handleTidyLayout}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
       />
@@ -275,6 +288,7 @@ export default function App() {
               onReconnect={onReconnect}
               onNodeClick={onNodeClick}
               onPaneClick={onPaneClick}
+              onInit={(instance) => { reactFlowRef.current = instance }}
               fitView
               fitViewOptions={{ padding: 0.25 }}
               minZoom={0.2}
